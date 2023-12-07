@@ -1,5 +1,4 @@
-import React from 'react';
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import '../css/homePage.css';
 
 const ROWS = 20;
@@ -20,10 +19,9 @@ export default function Page404() {
   const [currentShape, setCurrentShape] = useState(null);
   const [position, setPosition] = useState({ row: 0, col: Math.floor(COLS / 2) - 1 });
   const [gameOver, setGameOver] = useState(false);
-
   const requestRef = useRef();
 
-  const drawShape = () => {
+  const drawShape = useCallback(() => {
     if (!currentShape) return;
     const newBoard = board.map(row => row.slice());
     const { row, col } = position;
@@ -35,18 +33,18 @@ export default function Page404() {
       });
     });
     setBoard(newBoard);
-  };
+  }, [board, currentShape, position]);
 
-  const removeCompleteRows = () => {
+  const removeCompleteRows = useCallback(() => {
     const newBoard = board.filter(row => row.includes(EMPTY_CELL));
     const removedRows = ROWS - newBoard.length;
     for (let i = 0; i < removedRows; i++) {
       newBoard.unshift(Array(COLS).fill(EMPTY_CELL));
     }
     setBoard(newBoard);
-  };
+  }, [board]);
 
-  const checkCollision = (shape, pos) => {
+  const checkCollision = useCallback((shape, pos) => {
     for (let i = 0; i < shape.length; i++) {
       for (let j = 0; j < shape[i].length; j++) {
         if (shape[i][j] && (board[pos.row + i] && board[pos.row + i][pos.col + j]) !== EMPTY_CELL) {
@@ -55,9 +53,9 @@ export default function Page404() {
       }
     }
     return false;
-  };
+  }, [board]);
 
-  const moveShape = (direction) => {
+  const moveShape = useCallback((direction) => {
     const newPosition = { ...position };
     if (direction === 'left') {
       newPosition.col -= 1;
@@ -70,18 +68,18 @@ export default function Page404() {
     if (!checkCollision(currentShape, newPosition)) {
       setPosition(newPosition);
     }
-  };
+  }, [position, checkCollision, currentShape]);
 
-  const rotateShape = () => {
-    const newShape = currentShape[0].map((val, i) =>
-      currentShape.map(row => row[i]).reverse()
+  const rotateShape = useCallback(() => {
+    const newShape = currentShape[0].map((val, index) =>
+      currentShape.map(row => row[index]).reverse()
     );
     if (!checkCollision(newShape, position)) {
-      setCurrentShape([newShape]);
+      setCurrentShape(newShape);
     }
-  };
+  }, [currentShape, position, checkCollision]);
 
-  const handleKeyPress = (event) => {
+  const handleKeyPress = useCallback((event) => {
     switch (event.key) {
       case 'ArrowLeft':
         moveShape('left');
@@ -98,11 +96,11 @@ export default function Page404() {
       default:
         break;
     }
-  };
+  }, [moveShape, rotateShape]);
 
-  const gameLoop = () => {
+  const gameLoop = useCallback(() => {
     moveShape('down');
-  };
+  }, [moveShape]);
 
   const startGame = () => {
     setBoard(Array.from({ length: ROWS }, () => Array(COLS).fill(EMPTY_CELL)));
@@ -112,10 +110,10 @@ export default function Page404() {
     requestRef.current = requestAnimationFrame(gameLoop);
   };
 
-  const endGame = () => {
+  const endGame = useCallback(() => {
     setGameOver(true);
     cancelAnimationFrame(requestRef.current);
-  };
+  }, []);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
@@ -135,7 +133,7 @@ export default function Page404() {
         endGame();
       }
     }
-  }, [board, currentShape, gameOver, position]);
+  }, [board, currentShape, gameOver, position, drawShape, removeCompleteRows, checkCollision, endGame]);
 
   return (
     <div>
@@ -159,4 +157,4 @@ export default function Page404() {
       <button onClick={startGame}>Start Game</button>
     </div>
   );
-};
+}
