@@ -26,3 +26,12 @@
 .logo{
     height: 100px;
 }
+
+
+.theme-icon {
+    width: 50px; /* ou la taille souhaitée */
+    height: 50px; /* ou la taille souhaitée */
+    background: transparent;
+    border: none; /* Supprime la bordure si nécessaire */
+  }
+  

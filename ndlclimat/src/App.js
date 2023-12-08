@@ -11,19 +11,13 @@ import Page404 from './screens/404';
 export default function App() {
   const [theme, setTheme] = useState(ChristmasTheme); // Thème initial
 
-  // Fonction pour basculer entre les thèmes
-  const toggleTheme = () => {
-    setTheme(theme === ChristmasTheme ? ClimateChangeTheme : ChristmasTheme);
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <div>
         <BrowserRouter>
-          <NavigationBar toggleTheme={toggleTheme} />
+          <NavigationBar setTheme={setTheme} ChristmasTheme={ChristmasTheme} ClimateChangeTheme={ClimateChangeTheme} />
           <Routes>
             <Route index element={<HomePage />} />
-            {/* Les autres routes ici, commentées ou non */}
             <Route path="*" element={<Page404 />} />
           </Routes>
         </BrowserRouter>
